@@ -1,3 +1,4 @@
+import pytest
 import json
 
 
@@ -162,3 +163,94 @@ def test_confirmed_event_after_deadline_returns_no(
     assert result["event_date"] == "2024-03-25"
     assert result["evidence_strength"] == "STRONG"
     assert result["status"] == "RESOLVED"
+
+def test_yes_rejects_unconfirmed_event(direct_vm, direct_deploy):
+    setup_web_mocks(direct_vm)
+    setup_llm_mock(direct_vm, {
+        "decision": "YES",
+        "event_date": "2024-03-13",
+        "event_status": "NOT_CONFIRMED",
+        "evidence_strength": "STRONG",
+        "confidence": 98,
+        "evidence": "The evidence does not confirm that the event occurred.",
+        "reasoning": "YES requires a confirmed event.",
+    })
+
+    contract = direct_deploy("contracts/ProofBasedResolverV2.py")
+
+    with pytest.raises(Exception):
+        contract.resolve(
+            "Did the event happen before the deadline?",
+            "2024-03-20",
+            SOURCE_1,
+            SOURCE_2,
+        )
+
+
+def test_yes_rejects_event_after_deadline(direct_vm, direct_deploy):
+    setup_web_mocks(direct_vm)
+    setup_llm_mock(direct_vm, {
+        "decision": "YES",
+        "event_date": "2024-03-25",
+        "event_status": "CONFIRMED",
+        "evidence_strength": "STRONG",
+        "confidence": 98,
+        "evidence": "The evidence confirms the event.",
+        "reasoning": "The event occurred after the deadline.",
+    })
+
+    contract = direct_deploy("contracts/ProofBasedResolverV2.py")
+
+    with pytest.raises(Exception):
+        contract.resolve(
+            "Did the event happen before the deadline?",
+            "2024-03-20",
+            SOURCE_1,
+            SOURCE_2,
+        )
+
+
+def test_no_rejects_unconfirmed_event(direct_vm, direct_deploy):
+    setup_web_mocks(direct_vm)
+    setup_llm_mock(direct_vm, {
+        "decision": "NO",
+        "event_date": "2024-03-25",
+        "event_status": "NOT_CONFIRMED",
+        "evidence_strength": "STRONG",
+        "confidence": 98,
+        "evidence": "The evidence does not confirm that the event occurred.",
+        "reasoning": "NO requires a confirmed event.",
+    })
+
+    contract = direct_deploy("contracts/ProofBasedResolverV2.py")
+
+    with pytest.raises(Exception):
+        contract.resolve(
+            "Did the event happen before the deadline?",
+            "2024-03-20",
+            SOURCE_1,
+            SOURCE_2,
+        )
+
+
+def test_no_rejects_event_before_deadline(direct_vm, direct_deploy):
+    setup_web_mocks(direct_vm)
+    setup_llm_mock(direct_vm, {
+        "decision": "NO",
+        "event_date": "2024-03-13",
+        "event_status": "CONFIRMED",
+        "evidence_strength": "STRONG",
+        "confidence": 98,
+        "evidence": "The evidence confirms the event.",
+        "reasoning": "The event occurred before the deadline.",
+    })
+
+    contract = direct_deploy("contracts/ProofBasedResolverV2.py")
+
+    with pytest.raises(Exception):
+        contract.resolve(
+            "Did the event happen before the deadline?",
+            "2024-03-20",
+            SOURCE_1,
+            SOURCE_2,
+        )
