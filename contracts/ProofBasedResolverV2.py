@@ -293,15 +293,15 @@ Do NOT use prior knowledge.
             # -------------------------------------------------
             # 4. INTERNAL CONSISTENCY RULES
             # -------------------------------------------------
-
+    
             # YES requires confirmed event + actual evidence.
             if decision == "YES":
-
+    
                 if event_status != "CONFIRMED":
                     raise gl.vm.UserError(
                         "YES_REQUIRES_CONFIRMED_EVENT"
                     )
-
+    
                 if evidence_strength not in [
                     "STRONG",
                     "MODERATE"
@@ -309,31 +309,46 @@ Do NOT use prior knowledge.
                     raise gl.vm.UserError(
                         "YES_REQUIRES_SUFFICIENT_EVIDENCE"
                     )
-
+    
                 if event_date == "UNKNOWN":
                     raise gl.vm.UserError(
                         "YES_REQUIRES_EVENT_DATE"
                     )
-
-            # NO cannot simply mean "I found nothing".
+    
+                if event_date >= deadline:
+                    raise gl.vm.UserError(
+                        "YES_EVENT_NOT_BEFORE_DEADLINE"
+                    )
+    
+            # NO requires confirmed event after deadline.
             if decision == "NO":
-
-                if event_status not in [
-                    "CONFIRMED",
-                    "NOT_CONFIRMED"
+    
+                if event_status != "CONFIRMED":
+                    raise gl.vm.UserError(
+                        "NO_REQUIRES_CONFIRMED_EVENT"
+                    )
+    
+                if evidence_strength not in [
+                    "STRONG",
+                    "MODERATE"
                 ]:
                     raise gl.vm.UserError(
-                        "INVALID_NO_STATUS"
+                        "NO_REQUIRES_SUFFICIENT_EVIDENCE"
                     )
-
-                if evidence_strength == "NONE":
+    
+                if event_date == "UNKNOWN":
                     raise gl.vm.UserError(
-                        "NO_REQUIRES_EVIDENCE"
+                        "NO_REQUIRES_EVENT_DATE"
                     )
-
+    
+                if event_date <= deadline:
+                    raise gl.vm.UserError(
+                        "NO_EVENT_NOT_AFTER_DEADLINE"
+                    )
+    
             # UNDETERMINED is allowed when evidence is weak,
             # missing, or contradictory.
-
+    
             return {
                 "decision": decision,
                 "event_date": event_date,
