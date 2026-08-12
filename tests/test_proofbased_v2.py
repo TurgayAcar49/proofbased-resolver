@@ -254,3 +254,37 @@ def test_no_rejects_event_before_deadline(direct_vm, direct_deploy):
             SOURCE_1,
             SOURCE_2,
         )
+
+def test_resolve_cannot_be_called_twice(
+    direct_vm,
+    direct_deploy,
+):
+    setup_web_mocks(direct_vm)
+    setup_llm_mock(direct_vm, {
+        "decision": "YES",
+        "event_date": "2024-03-13",
+        "event_status": "CONFIRMED",
+        "evidence_strength": "STRONG",
+        "confidence": 98,
+        "evidence": "The supplied evidence confirms that the event occurred on 2024-03-13.",
+        "reasoning": "The confirmed event date is before the 2024-03-20 deadline.",
+    })
+
+    contract = direct_deploy(
+        "contracts/ProofBasedResolverV2.py"
+    )
+
+    contract.resolve(
+        "Did the event happen before the deadline?",
+        "2024-03-20",
+        SOURCE_1,
+        SOURCE_2,
+    )
+
+    with pytest.raises(Exception):
+        contract.resolve(
+            "A different question",
+            "2025-01-01",
+            "https://example.com/other-1",
+            "https://example.com/other-2",
+        )

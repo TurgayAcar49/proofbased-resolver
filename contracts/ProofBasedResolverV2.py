@@ -49,6 +49,11 @@ class ProofBasedResolverV2(gl.Contract):
         source_1: str,
         source_2: str,
     ) -> typing.Any:
+        if self.status == "RESOLVED":
+            raise gl.vm.UserError(
+                "ALREADY_RESOLVED"
+            )
+
 
         def leader_fn():
 
