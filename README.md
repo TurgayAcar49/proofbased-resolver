@@ -299,13 +299,13 @@ This four-state model is the foundation of ProofBased.
 
 ## On-Chain Deployment
 
-ProofBased V2 is deployed on GenLayer at:
+ProofBased V3 is deployed on GenLayer at:
 
 ~~~
-0x1D7b9d015638F94A2E951B7e29D6f73DeF9903ca
+0xfd4db676C989eECa0c376F0dE6D277EEE6Ba6705
 ~~~
 
-The V2 implementation has been tested through finalized resolution transactions covering:
+The V3 implementation has been tested through finalized resolution transactions covering:
 
 ~~~
 Insufficient evidence
