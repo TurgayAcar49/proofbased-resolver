@@ -302,7 +302,7 @@ This four-state model is the foundation of ProofBased.
 ProofBased V3 is deployed on GenLayer at:
 
 ~~~
-0xfd4db676C989eECa0c376F0dE6D277EEE6Ba6705
+0xBB107edE20B3bB3B0c6f0d90D579e2e3209b9D0A
 ~~~
 
 The V3 implementation has been tested through finalized resolution transactions covering:
